@@ -33,3 +33,8 @@
 @keyframes cow-danger{from{translate:-1px 0}to{translate:1px 0}}
 @media(max-height:690px){.top h1{font-size:24px}.discard-button{font-size:9px;min-height:24px;padding:3px 5px}.storage-line{font-size:8px}.cow-slot.dead .cow-label{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.cow-slot .cow-art{animation:none!important;transition:none!important}}
+/* Keep the two vital storage readings directly below the wallet. */
+.storage-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 13px;background:#fff9e8;border-bottom:2px solid #caa16f;line-height:1.35;min-height:43px}.storage-summary span{font-size:16px;font-weight:700;white-space:nowrap;color:#513b55;font-variant-numeric:tabular-nums}.storage-summary #freshness-text{color:#315c4b}.transfer-actions{display:flex;gap:7px;align-items:stretch;margin-top:7px}.transfer-actions .transfer{flex:1;min-width:0;margin-top:0}.transfer-actions .discard-button{width:62px;flex:none;margin:0;font-size:11px;line-height:1.4;font-weight:700;border-radius:10px}.pasture{height:348px}
+@media(max-height:760px){.pasture{height:290px}}
+@media(max-height:690px){.pasture{height:242px}.storage-summary{padding:8px 11px;min-height:39px}.storage-summary span{font-size:15px}.transfer-actions{margin-top:5px}.transfer-actions .discard-button{width:54px;font-size:10px}}
+@media(max-width:350px){.storage-summary{padding-inline:8px;gap:4px}.storage-summary span{font-size:14px}}
