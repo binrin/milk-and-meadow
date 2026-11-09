@@ -35,8 +35,10 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+          name: game-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Deploy verified game
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          timeout: 1200000
+          timeout: 600000
+          artifact_name: game-pages-${{ github.run_id }}-${{ github.run_attempt }}
