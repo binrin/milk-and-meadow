@@ -11,12 +11,16 @@ export function touchCow(s,id,tool='hand'){
   c.machine=true;return {ok:true,message:'자동 착유기 장착 완료',effect:'착유기 장착'};
  }
  if(tool==='pet'){const r=action(s,'pet',{id});return {...r,effect:r.ok?'♥ +3':null};}
- if(!c.colostrum){const r=action(s,'colostrum',{id});return {...r,effect:'첫 초유 ♥'};}
- if(c.fed!==s.day){const r=action(s,'feed',{id});return {...r,effect:r.ok?'냠냠!':null};}
- if(tool==='feed')return {ok:false,message:'지금은 배가 불러요.'};
+ if(tool==='feed'){
+  if(!c.colostrum){const r=action(s,'colostrum',{id});return {...r,effect:r.ok?'첫 초유 ♥':null};}
+  if(c.fed===s.day)return {ok:false,message:'지금은 배가 불러요.'};
+  const r=action(s,'feed',{id});return {...r,effect:r.ok?'냠냠!':null};
+ }
+ if(tool!=='hand')return {ok:false,message:'사용할 도구를 선택해주세요.'};
  if(c.age<5)return {ok:false,message:'송아지는 먹고 자라요. 쓰다듬어주세요.'};
  if(!BREEDS[c.breed].yield)return {ok:false,message:'육용 소예요. 먹이와 교감으로 키워주세요.'};
  if(dry(c))return {ok:false,message:'출산 준비 중이에요. 다른 소를 돌봐주세요.'};
+ if(c.fed!==s.day)return {ok:false,message:'먹이 도구를 선택하고 사료를 먼저 주세요.'};
  if(c.workUntil)return {ok:false,message:'지금 착유 중이에요.'};
  if((c.nextMilk||0)>(s.liveTick||0))return {ok:false,message:'우유가 차고 있어요. 다른 젖소를 돌봐주세요.'};
  c.workUntil=(s.liveTick||0)+2;return {ok:true,message:'착유 시작',effect:'착유 중…'};
