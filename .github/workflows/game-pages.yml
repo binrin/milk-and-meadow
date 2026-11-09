@@ -1,0 +1,42 @@
+name: Publish tested game
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: game-pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage verified release only
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, shutil, hashlib
+          dest=pathlib.Path('_site');dest.mkdir()
+          for name,digest in json.loads(pathlib.Path('.release-hashes.json').read_text()).items():
+              source=pathlib.Path(name)
+              assert hashlib.sha256(source.read_bytes()).hexdigest()==digest, name
+              target=dest/name;target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copy2(source,target)
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy verified game
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 1200000
