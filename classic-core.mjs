@@ -4,6 +4,9 @@ export const COWS=[{id:'normal',name:'얼룩 젖소',price:3500,rate:1.6},{id:'b
 export const PRODUCTS=[{id:'cream',name:'크림',milk:8,time:15,price:175},{id:'butter',name:'버터',milk:10,time:20,price:230},{id:'cheese',name:'치즈',milk:12,time:24,price:290},{id:'powder',name:'분유',milk:14,time:26,price:345},{id:'flavored',name:'가공유',milk:10,time:18,price:225},{id:'yogurt',name:'발효유',milk:12,time:22,price:285}];
 export const UPGRADES=[{id:'milker',name:'착유기',base:3600,fruit:1,max:5,description:'한 번에 짜는 양 +1'},{id:'tank',name:'착유통',base:5200,fruit:1,max:5,description:'착유통 용량 +6'},{id:'storage',name:'저장고',base:7200,fruit:1,max:5,description:'저장량 +80 · 신선도 유지'},{id:'prevention',name:'예방 설비',base:9600,fruit:1,max:5,description:'질병과 방해꾼 발생 감소'},{id:'factory',name:'유제품 공장',base:20000,fruit:2,max:5,description:'가공 개방 · 속도와 판매가 증가'}];
 export const STOCKS=[{id:'dairy',name:'행복유업',base:80},{id:'feed',name:'푸른사료',base:120},{id:'transport',name:'새벽운송',base:180}];
+export const GROWTH_LEVELS=[0,80,200,400,700,1100,1600,2300,3200,4500];
+export const GROWTH_SPEEDS=[.15,.22,.30,.40,.50,.60,.70,.80,.90,1];
+export function growth(s){const sold=Math.max(0,Number(s.sold)||0);let i=0;while(i<9&&sold>=GROWTH_LEVELS[i+1])i++;return {level:i+1,speed:GROWTH_SPEEDS[i],next:i===9?null:GROWTH_LEVELS[i+1],remaining:i===9?0:GROWTH_LEVELS[i+1]-sold};}
 export const MILK_SAFE=12,MILK_DANGER=18,MILK_FATAL=24,DRY_FATAL=4;
 const MAX=1e9;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -12,13 +15,13 @@ const int=(v,a=0,b=MAX)=>Math.floor(clamp(finite(v),a,b));
 const result=(ok,message,extra={})=>({ok,message,...extra});
 const cow=(kind=0,milk=6)=>({kind,milk,disease:false,threat:null,boost:0,dry:0,dead:null,overflowWarned:false});
 const rand=s=>{let n=s.rng|0;n^=n<<13;n^=n>>>17;n^=n<<5;s.rng=n>>>0;return s.rng/4294967296;};
-export function fresh(seed=Date.now()){return {version:1,rules:2,losses:0,coins:200,fruit:2,elapsed:0,month:1,tool:'milk',cows:[cow(0,6),cow(0,9),cow(0,12),null,null,null,null,null,null],carried:0,storage:0,freshness:100,upgrades:{milker:0,tank:0,storage:0,prevention:0,factory:0},merchant:null,merchantIn:25,hazardIn:40,pet:{name:'몽실이',love:40,food:75,playCooldown:0,feedCooldown:0},products:[0,0,0,0,0,0],job:null,stocks:STOCKS.map(x=>({price:x.base,owned:0})),rng:(int(seed,1,4294967295)||1),sold:0,reputation:0,stimCooldown:0,selfBoost:0};}
+export function fresh(seed=Date.now()){return {version:1,rules:2,losses:0,coins:200,fruit:2,elapsed:0,month:1,tool:'milk',cows:[cow(0,3),cow(0,5),cow(0,7),null,null,null,null,null,null],carried:0,storage:0,freshness:100,upgrades:{milker:0,tank:0,storage:0,prevention:0,factory:0},merchant:null,merchantIn:25,hazardIn:40,pet:{name:'몽실이',love:40,food:75,playCooldown:0,feedCooldown:0},products:[0,0,0,0,0,0],job:null,stocks:STOCKS.map(x=>({price:x.base,owned:0})),rng:(int(seed,1,4294967295)||1),sold:0,reputation:0,stimCooldown:0,selfBoost:0};}
 export function getCapacity(s){return {carried:12+6*s.upgrades.tank,storage:120+80*s.upgrades.storage,tap:3+s.upgrades.milker+(s.selfBoost>0?2:0)};}
-export function cowReadyIn(s,c){if(!c||c.dead)return Infinity;if(c.disease||c.threat)return Infinity;return Math.max(0,(Math.min(12,getCapacity(s).tap)-c.milk)/(COWS[c.kind].rate*(1+s.pet.love/500)*(c.boost>0?2:1)));}
+export function cowReadyIn(s,c){if(!c||c.dead)return Infinity;if(c.disease||c.threat)return Infinity;return Math.max(0,(Math.min(12,getCapacity(s).tap)-c.milk)/milkRate(s,c));}
 export function upgradeCost(s,key){const u=UPGRADES.find(u=>u.id===key);if(!u)return null;const level=s.upgrades[key];return {coins:Math.round(u.base*Math.pow(1.85,level)),fruit:u.fruit+Math.floor(level/2),max:level>=u.max};}
 export function setTool(s,key){if(!TOOLS.some(t=>t.id===key))return result(false,'없는 장비예요.');s.tool=key;return result(true,TOOLS.find(t=>t.id===key).name+' 장착');}
 function die(s,c,cause){c.dead=cause;c.milk=0;c.boost=0;c.threat=null;c.disease=false;s.losses=(s.losses||0)+1;}
-export function milkRate(s,c){return COWS[c.kind].rate*(1+s.pet.love/500)*(c.boost>0?2:1);}
+export function milkRate(s,c){return COWS[c.kind].rate*growth(s).speed*(1+s.pet.love/500)*(c.boost>0?2:1);}
 export function discardCarried(s){if(!s.carried)return result(false,'착유통이 비어 있어요.');const n=s.carried;s.carried=0;return result(true,'우유 '+n+'통을 버렸어요. 다시 착유할 수 있어요.');}
 export function tapCow(s,index){const c=s.cows[index];if(c?.dead)return result(false,'죽은 젖소는 돌아오지 않아요. 새 젖소를 데려와 주세요.');if(!c)return result(false,'빈 자리에 젖소를 데려오세요.');
  if(s.tool==='gun'){if(!c.threat)return result(false,'방해꾼이 없는 자리예요.');const name=c.threat.kind==='wolf'?'늑대':'벌레';c.threat=null;s.reputation++;return result(true,name+'를 쫓아냈어요!',{effect:'defend'});}
