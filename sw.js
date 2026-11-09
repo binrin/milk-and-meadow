@@ -1,7 +1,27 @@
-const CACHE='milk-meadow-v2.1.8';
-const FILES=['./','./index.html','./style.css','./app.mjs','./save-queue.mjs','./core.mjs','./business.mjs','./map.mjs','./scene.mjs','./phaser.min.js','./cows-walk-2d.png','./live.mjs','./cows-live-2d.png','./terrain-2d.png','./props-2d.png','./Jua-Regular.ttf','./buildings-2d.png','./manifest.webmanifest','./icon-2d.png'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(async file=>{const url=new URL(file,self.location.href);url.searchParams.set('release',CACHE);const response=await fetch(url,{cache:'reload'});if(!response.ok)throw Error('Offline asset download failed: '+file);await c.put(new URL(file,self.location.href).href,response);})))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('milk-meadow-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).catch(()=>{if(e.request.mode==='navigate')return caches.match('./index.html');return Response.error();})));});
+const CACHE="milk-meadow-v3.0.0-e11dc1e59bf6";
+const FILES=["./", "./app.mjs", "./assets/Jua-Regular.ttf", "./assets/buildings-2d.png", "./assets/classic/cow-0.png", "./assets/classic/cow-1.png", "./assets/classic/cow-2.png", "./assets/classic/cow-3.png", "./assets/classic/cow-4.png", "./assets/classic/cow-5.png", "./assets/classic/pasture.webp", "./assets/classic/product-0.png", "./assets/classic/product-1.png", "./assets/classic/product-2.png", "./assets/classic/product-3.png", "./assets/classic/product-4.png", "./assets/classic/product-5.png", "./assets/classic/prop-0.png", "./assets/classic/prop-1.png", "./assets/classic/prop-10.png", "./assets/classic/prop-11.png", "./assets/classic/prop-2.png", "./assets/classic/prop-3.png", "./assets/classic/prop-4.png", "./assets/classic/prop-5.png", "./assets/classic/prop-6.png", "./assets/classic/prop-7.png", "./assets/classic/prop-8.png", "./assets/classic/prop-9.png", "./assets/cows-2d.png", "./assets/cows-live-2d.png", "./assets/cows-walk-2d.png", "./assets/farm.png", "./assets/fonts/LINESeedKR-Bd.woff2", "./assets/fonts/LINESeedKR-Rg.woff2", "./assets/icon-180.png", "./assets/icon-192.png", "./assets/icon-2d.png", "./assets/icon-512.png", "./assets/props-2d.png", "./assets/ranch-2d.png", "./assets/terrain-2d.png", "./business.mjs", "./classic-app.mjs", "./classic-core.mjs", "./classic.css", "./core.mjs", "./expanded.html", "./index.html", "./live.mjs", "./manifest.webmanifest", "./map.mjs", "./phaser.min.js", "./save-queue.mjs", "./scene.mjs", "./style.css"];
 
-self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting();});
+self.addEventListener('install', event => event.waitUntil(
+  caches.open(CACHE).then(cache => cache.addAll(FILES.map(url =>
+    new Request(url, {cache: 'reload'})))).then(() => self.skipWaiting())
+));
+self.addEventListener('activate', event => event.waitUntil(
+  caches.keys().then(keys => Promise.all(keys.filter(key =>
+    key.startsWith('milk-meadow-') && key !== CACHE).map(key => caches.delete(key))))
+    .then(() => self.clients.claim())
+));
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if(event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  if(url.pathname.endsWith('/update.html') || url.pathname.endsWith('/sw.js')) {
+    event.respondWith(fetch(event.request, {cache: 'no-store'})); return;
+  }
+  event.respondWith(caches.open(CACHE).then(cache => cache.match(event.request))
+    .then(hit => hit || fetch(event.request).catch(() => {
+      if(event.request.mode === 'navigate') return caches.open(CACHE).then(cache => cache.match('./index.html'));
+      return Response.error();
+    })));
+});
+self.addEventListener('message', event => {
+  if(event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
