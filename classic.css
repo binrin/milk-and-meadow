@@ -84,3 +84,6 @@ html,body{height:100%;overflow:hidden}body{min-height:0}
 @media(max-width:350px){.top{padding-inline:8px}.top-actions{gap:4px}.top h1{font-size:19px}.top h1 span{font-size:12px}}
 
 .hud .heart-icon{font-size:28px}@media(max-height:700px){.hud .heart-icon{font-size:24px}}
+
+/* Keep horns and breed badges clear of the ranch sign. */
+.herd{top:48px}@media(max-height:700px){.herd{top:46px}}
