@@ -100,3 +100,11 @@ html,body{height:100%;overflow:hidden}body{min-height:0}
 .breed-stage b{font-size:14px;color:#69482e;background:#fff1d4;padding:3px 16px;border-radius:12px}
 .growth-arrow{font-size:26px;color:#a67340}
 @media(max-width:350px){.breed-stage .calf-art,.breed-stage>img{height:108px}}
+
+/* Storage, freshness and quick sale stay together in one mobile row. */
+#game{grid-template-rows:44px 40px 38px minmax(0,1fr) 44px 22px 96px 50px 14px}
+.storage-summary{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;padding:3px 8px}
+.storage-summary span{font-size:14px;line-height:20px}
+.storage-summary #quick-sell{height:30px;min-height:30px;padding:2px 8px;font-size:13px;border-radius:8px}
+@media(max-height:700px){#game{grid-template-rows:36px 32px 34px minmax(0,1fr) 38px 18px 76px 42px 12px}.storage-summary{padding-block:1px}}
+@media(max-width:350px){.storage-summary{gap:5px;padding-inline:6px}.storage-summary span{font-size:12px}.storage-summary #quick-sell{padding-inline:6px;font-size:12px}}
