@@ -74,3 +74,13 @@ html,body{height:100%;overflow:hidden}body{min-height:0}
 .transfer-actions .transfer{height:40px}.bottom-nav button{height:44px}.bottom-nav img{height:25px;width:29px}.bottom-nav span{font-size:12px}
 .quick-sale button{height:33px;font-size:15px}.storage-summary span{font-size:15px}.merchant>img{height:35px}.merchant b{font-size:12px}.merchant small{font-size:10px}
 @media(max-height:700px){#game{grid-template-rows:30px 32px 22px 38px minmax(0,1fr) 38px 18px 76px 42px 12px}.herd{inset:36px 7px 5px;gap:3px 7px}.workbench{grid-template-rows:40px 32px;gap:1px}.tool img{height:23px;width:28px}.tool{font-size:11px;line-height:12px}.transfer-actions .transfer{height:32px}.bottom-nav button{height:39px}.bottom-nav img{height:23px;width:27px}.bottom-nav span{font-size:10px}.quick-sale button{height:26px;font-size:13px}.storage-summary span{font-size:13px}.cow-slot .cow-art{height:calc(100% - 12px)}}
+
+/* Compact sale in the title bar returns the entire sale row to the pasture. */
+#game{grid-template-rows:44px 40px 28px minmax(0,1fr) 44px 22px 96px 50px 14px}
+.top-actions{display:flex;align-items:center;gap:6px}.top h1{white-space:nowrap;font-size:22px}.top h1 span{font-size:14px}
+#quick-sell{flex:none;min-height:36px;padding:4px 9px;border:2px solid #c18b41;border-radius:10px;background:linear-gradient(#ffe8ad,#efbd63);color:#59391d;font:700 14px LineSeed,system-ui,sans-serif;white-space:nowrap}#quick-sell:disabled{opacity:.6}
+.heart-icon{display:inline-flex;justify-content:center;align-items:center;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;font-size:28px;line-height:1;width:32px;height:32px;flex:none}.tool .heart-icon{width:34px;height:28px;font-size:26px}
+@media(max-height:700px){#game{grid-template-rows:36px 32px 22px minmax(0,1fr) 38px 18px 76px 42px 12px}.top h1{font-size:19px}.top h1 span{font-size:12px}#quick-sell{min-height:30px;padding:3px 7px;font-size:12px}.heart-icon{font-size:24px;width:27px;height:27px}.tool .heart-icon{font-size:22px;height:23px;width:28px}}
+@media(max-width:350px){.top{padding-inline:8px}.top-actions{gap:4px}.top h1{font-size:19px}.top h1 span{font-size:12px}}
+
+.hud .heart-icon{font-size:28px}@media(max-height:700px){.hud .heart-icon{font-size:24px}}

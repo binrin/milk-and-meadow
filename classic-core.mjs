@@ -3,16 +3,16 @@ export const TOOLS=[{id:'milk',name:'착유기'},{id:'cure',name:'치료기'},{i
 export const COWS=[
  {id:'normal',name:'얼룩 젖소',price:3500,rate:1.6,art:0,hue:0},
  {id:'brown',name:'갈색 젖소',price:8000,rate:2,art:2,hue:0},
- {id:'super',name:'슈퍼 젖소',price:21000,rate:2.4,art:3,hue:0},
- {id:'strawberry',name:'딸기우유 젖소',price:29000,rate:2.45,art:5,hue:320},
- {id:'vanilla',name:'바닐라 젖소',price:38000,rate:2.5,art:3,hue:25},
- {id:'mint',name:'민트초코 젖소',price:49000,rate:2.55,art:2,hue:110},
- {id:'lavender',name:'라벤더 젖소',price:62000,rate:2.6,art:5,hue:220},
- {id:'peach',name:'복숭아 젖소',price:77000,rate:2.65,art:3,hue:330},
- {id:'moon',name:'달빛 젖소',price:94000,rate:2.7,art:0,hue:190},
- {id:'aurora',name:'오로라 젖소',price:115000,rate:2.75,art:5,hue:140},
- {id:'gold',name:'황금 젖소',price:143000,rate:2.8,art:3,hue:40},
- {id:'galaxy',name:'은하수 젖소',price:180000,rate:2.85,art:5,hue:260}
+ {id:'super',name:'슈퍼 젖소',price:21000,rate:2.4,art:'breed-super',hue:0},
+ {id:'strawberry',name:'딸기우유 젖소',price:29000,rate:2.45,art:'breed-strawberry',hue:0},
+ {id:'vanilla',name:'바닐라 젖소',price:38000,rate:2.5,art:'breed-vanilla',hue:0},
+ {id:'mint',name:'민트초코 젖소',price:49000,rate:2.55,art:'breed-mint',hue:0},
+ {id:'lavender',name:'라벤더 젖소',price:62000,rate:2.6,art:'breed-lavender',hue:0},
+ {id:'peach',name:'복숭아 젖소',price:77000,rate:2.65,art:'breed-peach',hue:0},
+ {id:'moon',name:'달빛 젖소',price:94000,rate:2.7,art:'breed-moon',hue:0},
+ {id:'aurora',name:'오로라 젖소',price:115000,rate:2.75,art:'breed-aurora',hue:0},
+ {id:'gold',name:'황금 젖소',price:143000,rate:2.8,art:'breed-gold',hue:0},
+ {id:'galaxy',name:'은하수 젖소',price:180000,rate:2.85,art:'breed-galaxy',hue:0}
 ];
 export const BREEDS=COWS.slice(2).map((c,i)=>({kind:i+2,parents:[i,i+1],coins:c.price,fruit:3+i*2}));
 export const MERCHANT_FIRST=15,MERCHANT_WAIT=20;
@@ -23,7 +23,7 @@ export function breedQuote(s,kind){
  const recipe=BREEDS.find(r=>r.kind===kind);if(!recipe)return {ok:false,message:'교배할 품종을 골라 주세요.'};
  const parents=recipe.parents.map(k=>s.cows.findIndex(c=>c&&!c.dead&&c.kind===k&&!c.disease&&!c.threat&&!c.dry&&!c.growRemaining&&!c.breedCooldown&&c.milk<MILK_DANGER));
  const slot=s.cows.findIndex(c=>!c||c.dead);
- const message=parents.includes(-1)?'건강한 성체 부모가 필요해요. 성장·휴식·질병·젖 상태를 확인하세요.':slot<0?'빈 자리가 필요해요. 목장·장비 → 젖소 판매에서 자리를 비워 주세요.':s.coins<recipe.coins||s.fruit<recipe.fruit?'금화와 사랑의 열매를 더 모아 주세요.':'';
+ const message=parents.includes(-1)?'건강한 성체 부모가 필요해요. 성장·휴식·질병·젖 상태를 확인하세요.':slot<0?'빈 자리가 필요해요. 목장·장비 → 젖소 판매에서 자리를 비워 주세요.':s.coins<recipe.coins||s.fruit<recipe.fruit?'금화와 사랑의 하트를 더 모아 주세요.':'';
  return {...recipe,ok:!message,message,parents,slot};
 }
 export function breedCow(s,kind){const q=breedQuote(s,kind);if(!q.ok)return result(false,q.message);s.coins-=q.coins;s.fruit-=q.fruit;for(const i of q.parents)s.cows[i].breedCooldown=120;s.cows[q.slot]={...cow(kind,0),growRemaining:60};careBreak(s);return result(true,COWS[kind].name+' 송아지가 태어났어요! 목장에서 60초 뒤 자라요.',{slot:q.slot});}
@@ -59,21 +59,21 @@ export function tapCow(s,index){const c=s.cows[index];if(c?.dead)return result(f
  const amount=Math.min(cap.tap,Math.floor(c.milk),cap.carried-s.carried);if(amount<1){c.dry=Math.min(DRY_FATAL,(c.dry||0)+1);if(c.dry>=DRY_FATAL){die(s,c,'overmilk');return result(false,(index+1)+'번 젖소가 과도한 착유로 말라 죽었어요.',{changed:true,effect:'death'});}return result(false,'우유가 없어요! 연타하면 말라 죽어요 · 위험 '+Math.ceil(c.dry)+'/4',{changed:true,effect:'dry'});}c.milk-=amount;c.dry=Math.max(0,(c.dry||0)-.5);if(c.milk<MILK_DANGER)c.overflowWarned=false;s.carried+=amount;return result(true,'우유 +'+amount,{effect:'milk',amount});}
 export function transfer(s){if(s.tool==='stim'){if(s.stimCooldown>0)return result(false,'스팀팩이 충전 중이에요.');s.selfBoost=18;s.stimCooldown=24;return result(true,'18초 동안 한 번에 짜는 양 +2',{effect:'boost'});}const n=Math.min(s.carried,getCapacity(s).storage-s.storage);if(n<=0)return result(false,s.carried?'저장고가 가득 찼어요. 바로 판매 버튼으로 우유를 팔아 주세요.':'착유통에 우유가 없어요.');s.freshness=(s.freshness*s.storage+100*n)/(s.storage+n);s.storage+=n;s.carried-=n;return result(true,'원유 '+n+'통을 저장고에 옮겼어요.',{amount:n,effect:'transfer'});}
 export function buyCow(s,index,kind=0){if(!Number.isInteger(index)||index<0||index>8||(s.cows[index]&&!s.cows[index].dead))return result(false,'비어 있는 자리를 골라 주세요.');if(!Number.isInteger(kind)||!COWS[kind])return result(false,'젖소 종류를 확인해 주세요.');if(kind>=2)return result(false,'상위 젖소는 교배로만 얻을 수 있어요.');const p=COWS[kind].price;if(s.coins<p)return result(false,'금화 '+p.toLocaleString()+'개가 필요해요.');s.coins-=p;s.cows[index]=cow(kind,6);return result(true,COWS[kind].name+'가 목장에 왔어요!');}
-export function upgrade(s,key){const p=upgradeCost(s,key);if(!p||p.max)return result(false,'최고 단계예요.');if(s.coins<p.coins||s.fruit<p.fruit)return result(false,'금화와 사랑의 열매가 더 필요해요.');s.coins-=p.coins;s.fruit-=p.fruit;s.upgrades[key]++;return result(true,UPGRADES.find(u=>u.id===key).name+' 강화 완료!');}
+export function upgrade(s,key){const p=upgradeCost(s,key);if(!p||p.max)return result(false,'최고 단계예요.');if(s.coins<p.coins||s.fruit<p.fruit)return result(false,'금화와 사랑의 하트가 더 필요해요.');s.coins-=p.coins;s.fruit-=p.fruit;s.upgrades[key]++;return result(true,UPGRADES.find(u=>u.id===key).name+' 강화 완료!');}
 export const merchantPrice = m => m.price * 3;
 export function quickSaleQuote(s){const amount=s.storage+s.carried;const income=s.carried*40+s.storage*(s.freshness>=70?40:32);return {amount,income};}
-export function quickSell(s){const {amount,income}=quickSaleQuote(s);if(!amount)return result(false,'판매할 우유가 없어요. 먼저 젖을 짜 주세요.');const fruit=Math.floor((s.sold+amount)/40)-Math.floor(s.sold/40);s.storage=0;s.carried=0;s.freshness=100;s.coins=Math.min(MAX,s.coins+income);s.sold+=amount;s.reputation+=Math.ceil(amount/10);s.fruit+=fruit;return result(true,'우유 '+amount+'통 즉시 판매! 금화 +'+income+(fruit?' · 사랑의 열매 +'+fruit:''),{amount,income,fruit});}
+export function quickSell(s){const {amount,income}=quickSaleQuote(s);if(!amount)return result(false,'판매할 우유가 없어요. 먼저 젖을 짜 주세요.');const fruit=Math.floor((s.sold+amount)/40)-Math.floor(s.sold/40);s.storage=0;s.carried=0;s.freshness=100;s.coins=Math.min(MAX,s.coins+income);s.sold+=amount;s.reputation+=Math.ceil(amount/10);s.fruit+=fruit;return result(true,'우유 '+amount+'통 즉시 판매! 금화 +'+income+(fruit?' · 사랑의 하트 +'+fruit:''),{amount,income,fruit});}
 export function merchantSell(s,qty,bargain=false){const m=s.merchant;if(!m)return result(false,'다음 상인을 기다려 주세요.');qty=int(qty,0,100000);if(!qty)return result(false,'판매 수량을 골라 주세요.');if(qty>s.storage||qty>m.quantity)return result(false,'저장량과 상인 주문량 안에서 판매해 주세요.');let factor=1;
  if(bargain){if(m.bargained)return result(false,'이번 상인과는 이미 흥정했어요.');m.bargained=true;factor=s.freshness>=m.freshness&&m.market!=='surplus'?1.2:0.9;}
  const quality=s.freshness>=m.freshness?1:0.8;const income=Math.floor(qty*merchantPrice(m)*factor*quality);s.storage-=qty;m.quantity-=qty;s.coins=Math.min(MAX,s.coins+income);s.sold+=qty;s.reputation+=Math.ceil(qty/10);const fruit=Math.floor(s.sold/40)-Math.floor((s.sold-qty)/40);s.fruit+=fruit;
- if(m.quantity===0){s.merchant=null;s.merchantIn=MERCHANT_WAIT;}return result(true,qty+'통 판매! 금화 +'+income+(fruit?' · 사랑의 열매 +'+fruit:''),{amount:qty,income,fruit,bargain:factor});}
+ if(m.quantity===0){s.merchant=null;s.merchantIn=MERCHANT_WAIT;}return result(true,qty+'통 판매! 금화 +'+income+(fruit?' · 사랑의 하트 +'+fruit:''),{amount:qty,income,fruit,bargain:factor});}
 export function carePet(s,action){if(action==='feed'){if(s.pet.food>=95)return result(false,'몽실이는 아직 배불러요.');if(s.pet.feedCooldown>0)return result(false,'조금 뒤에 다시 먹이를 주세요.');if(s.coins<30)return result(false,'먹이값 금화 30개가 필요해요.');s.coins-=30;s.pet.food=Math.min(100,s.pet.food+40);s.pet.love=Math.min(100,s.pet.love+3);s.pet.feedCooldown=15;return result(true,'맛있게 냠냠! 포만감과 친밀도가 올랐어요.');}
  if(!['talk','play'].includes(action))return result(false,'돌봄을 골라 주세요.');if(s.pet.playCooldown>0)return result(false,Math.ceil(s.pet.playCooldown)+'초 뒤 다시 놀아 주세요.');s.pet.love=Math.min(100,s.pet.love+(action==='play'?5:3));s.pet.playCooldown=20;return result(true,action==='play'?'몽실이가 신나게 놀아요! 친밀도 +5':'몽실이가 반갑게 인사해요! 친밀도 +3');}
 export function craft(s,product){const i=typeof product==='string'?PRODUCTS.findIndex(p=>p.id===product):product;const p=PRODUCTS[i];if(!p)return result(false,'제품을 골라 주세요.');if(!s.upgrades.factory)return result(false,'먼저 공장을 건설해 주세요.');if(s.job)return result(false,'다른 유제품을 만들고 있어요.');if(s.storage<p.milk)return result(false,'저장고 원유 '+p.milk+'통이 필요해요.');s.storage-=p.milk;s.job={product:i,remaining:p.time/(1+(s.upgrades.factory-1)*0.2),total:p.time/(1+(s.upgrades.factory-1)*0.2)};return result(true,p.name+' 가공을 시작했어요.');}
-export function sellProduct(s,product){const i=typeof product==='string'?PRODUCTS.findIndex(p=>p.id===product):product;const p=PRODUCTS[i];if(!p||!s.products[i])return result(false,'판매할 제품이 없어요.');const count=s.products[i],income=Math.floor(count*p.price*(1+s.upgrades.factory*0.12));s.products[i]=0;s.coins=Math.min(MAX,s.coins+income);s.reputation+=count;s.fruit+=count;return result(true,p.name+' '+count+'개 판매! 금화 +'+income+' · 열매 +'+count,{income});}
+export function sellProduct(s,product){const i=typeof product==='string'?PRODUCTS.findIndex(p=>p.id===product):product;const p=PRODUCTS[i];if(!p||!s.products[i])return result(false,'판매할 제품이 없어요.');const count=s.products[i],income=Math.floor(count*p.price*(1+s.upgrades.factory*0.12));s.products[i]=0;s.coins=Math.min(MAX,s.coins+income);s.reputation+=count;s.fruit+=count;return result(true,p.name+' '+count+'개 판매! 금화 +'+income+' · 하트 +'+count,{income});}
 export function tradeStock(s,index,qty){if(!Number.isInteger(index)||!s.stocks[index]||!Number.isInteger(qty)||qty===0||Math.abs(qty)>10000)return result(false,'거래 수량을 확인해 주세요.');const stock=s.stocks[index];if(qty>0){const cost=Math.ceil(stock.price*qty*1.02);if(s.coins<cost)return result(false,'금화가 부족해요.');if(stock.owned+qty>10000)return result(false,'보유 한도는 10,000주예요.');s.coins-=cost;stock.owned+=qty;return result(true,qty+'주 매입 · 수수료 포함 '+cost);}if(-qty>stock.owned)return result(false,'보유 수량보다 많이 팔 수 없어요.');const income=Math.floor(stock.price*(-qty)*0.98);stock.owned+=qty;s.coins=Math.min(MAX,s.coins+income);return result(true,(-qty)+'주 매각 · 금화 +'+income);}
 function spawnMerchant(s){const names=['마을 상인','우유 배달부','카페 사장님','유제품 연구원','제빵사','시장 상인'];const look=Math.floor(rand(s)*names.length),market=['normal','shortage','surplus'][Math.floor(rand(s)*3)];s.merchant={name:names[look],look,quantity:24+Math.floor(rand(s)*25),price:market==='shortage'?19:market==='surplus'?13:16,freshness:65+Math.floor(rand(s)*25),remaining:30,market,bargained:false};}
-function step(s,dt,events){const oldMonth=s.month;s.elapsed+=dt;s.month=Math.floor(s.elapsed/90)+1;if(s.month!==oldMonth){s.stocks.forEach((x,i)=>x.price=Math.max(15,Math.round(clamp(x.price*(0.82+rand(s)*0.36),STOCKS[i].base*0.4,STOCKS[i].base*2.5))));s.fruit++;events.push('새로운 달! 사랑의 열매 +1 · 주가가 바뀌었어요.');}
+function step(s,dt,events){const oldMonth=s.month;s.elapsed+=dt;s.month=Math.floor(s.elapsed/90)+1;if(s.month!==oldMonth){s.stocks.forEach((x,i)=>x.price=Math.max(15,Math.round(clamp(x.price*(0.82+rand(s)*0.36),STOCKS[i].base*0.4,STOCKS[i].base*2.5))));s.fruit++;events.push('새로운 달! 사랑의 하트 +1 · 주가가 바뀌었어요.');}
  s.stimCooldown=Math.max(0,s.stimCooldown-dt);s.selfBoost=Math.max(0,s.selfBoost-dt);s.pet.playCooldown=Math.max(0,s.pet.playCooldown-dt);s.pet.feedCooldown=Math.max(0,s.pet.feedCooldown-dt);s.pet.food=Math.max(0,s.pet.food-dt/10);if(s.pet.food===0)s.pet.love=Math.max(0,s.pet.love-dt/20);
  if(s.storage>0)s.freshness=Math.max(30,s.freshness-dt*0.07/(1+s.upgrades.storage*0.5));else s.freshness=100;
  const protectedCows=cowsPaused(s);s.careRemaining=Math.max(0,(s.careRemaining||0)-dt);
