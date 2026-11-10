@@ -1,6 +1,6 @@
 import {BREEDS,breedCow,breedQuote,rehomeCow,defend,careBreak,cowsPaused,fresh,validate,tick,tapCow,transfer,setTool,buyCow,upgrade,upgradeCost,getCapacity,cowReadyIn,merchantSell,merchantPrice,quickSaleQuote,quickSell,carePet,craft,sellProduct,tradeStock,discardCarried,milkRate,growth,MILK_SAFE,MILK_DANGER,MILK_FATAL,DRY_FATAL,TOOLS,COWS,PRODUCTS,UPGRADES,STOCKS} from './classic-core.mjs';
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=v=>Math.floor(v).toLocaleString('ko-KR');
-const KEY='jjayo-classic-touch-v1',BACKUP=KEY+'-previous',VERSION='3.3.0';
+const KEY='jjayo-classic-touch-v1',BACKUP=KEY+'-previous',VERSION='3.3.1';
 let s=fresh(),paused=false,saving=true,first=true,modalKind='',shopTab='cows',toastTimer,sound=false,audio;
 try{const raw=localStorage.getItem(KEY);if(raw){s=validate(JSON.parse(raw));first=false;}sound=localStorage.getItem(KEY+'-sound')==='true';}catch{saving=false;first=false;}
 function save(){if(!saving)return false;try{const next=JSON.stringify(s),old=localStorage.getItem(KEY);if(old&&old!==next)localStorage.setItem(BACKUP,old);localStorage.setItem(KEY,next);return true;}catch{saving=false;$('save-state').textContent='저장 공간 확인 · 백업 필요';return false;}}
